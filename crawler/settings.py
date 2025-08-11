@@ -30,6 +30,9 @@ class Constant:
     NAVER_ID_INPUT_ID = 'id'
     NAVER_PASSWORD_INPUT_ID = 'pw'
 
+    NAVER_ID_INPUT_ELEMENT = 'input[id="id"]'
+    NAVER_PASSWORD_INPUT_ELEMENT =  'input[id="pw"]'
+
     NAVER_POPULAR_POST_CSS_SELECTOR = '[data-slog-container="ugB_bsR"]'
     NAVER_NAME_POPULAR_POST_CSS_SELECTOR = '[data-slog-container="ugB_qpR"]'
     NAVER_SMART_BLOCK_1_CSS_SELECTOR = '[data-slog-container="ugB_b1R"]'

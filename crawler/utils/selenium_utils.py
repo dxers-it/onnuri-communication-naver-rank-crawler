@@ -24,3 +24,23 @@ def human_scroll(driver):
         delta = random.randint(height // 4, height // 2)
         driver.execute_script(f"window.scrollBy(0, {delta});")
         time.sleep(random.uniform(0.3, 0.6))
+
+def fake_paste_events(driver, elem, text: str):
+    driver.execute_script("""
+        const el = arguments[0], val = arguments[1];
+        el.focus();
+
+        try {
+          el.dispatchEvent(new ClipboardEvent('paste', { bubbles: true, cancelable: true }));
+        } catch (e) {
+                          
+        }
+
+        // 값 주입 (기존 값 뒤에 붙여넣기처럼)
+        const prev = (el.value ?? '');
+        el.value = prev + val;
+
+        // 프레임워크가 감지할 수 있도록 input/change 이벤트 발생
+        el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertFromPaste', data: val }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+    """, elem, text)

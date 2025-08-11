@@ -1,12 +1,14 @@
 from ..utils.common import get_korean_datetime_string, compare_subject, conversion_list
-from ..utils.selenium_utils import set_chrome_driver, human_scroll
+from ..utils.selenium_utils import set_chrome_driver, human_scroll, fake_paste_events
 from ..pipelines.google_sheets import GoogleSheet
 from ..settings import Constant, Env
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-import time, pyautogui, pyperclip
+import time, random
 
 class NaverSpider:
     """
@@ -31,8 +33,6 @@ class NaverSpider:
 
         ranks, datetimes = conversion_list(self.adults, self.not_adults)
         self.google_sheet_instance.set_result_values(ranks, datetimes)
-        # saveJsonFile(self.not_adults, 'not_adults')
-        # saveJsonFile(self.adults, 'adult')
 
 
     def _check_rank(self, obj):
@@ -42,7 +42,6 @@ class NaverSpider:
         if self.count % 200 == 0: time.sleep(30)
 
         self.driver.get(Constant.SEARCH_URL(obj['keyword']))
-        time.sleep(1.2)
 
         human_scroll(self.driver)
 
@@ -54,17 +53,19 @@ class NaverSpider:
     def _login(self):
         self.driver.get(Env.NAVER_LOGIN_URL)
 
-        search_input = self.driver.find_element(By.ID, Constant.NAVER_ID_INPUT_ID)
-        search_input.click()
-        pyperclip.copy(Env.NAVER_ID)
-        pyautogui.hotkey("ctrl", "v")
-        time.sleep(1)
+        wait = WebDriverWait(self.driver, 10)
 
-        search_input = self.driver.find_element(By.ID, Constant.NAVER_PASSWORD_INPUT_ID)
+        search_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, Constant.NAVER_ID_INPUT_ELEMENT)))
         search_input.click()
-        pyperclip.copy(Env.NAVER_PASSWORD)
-        pyautogui.hotkey("ctrl", "v")
-        time.sleep(1)
+        time.sleep(random.uniform(0.1, 0.3))
+
+        fake_paste_events(self.driver, search_input, Env.NAVER_ID)
+
+        search_input = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, Constant.NAVER_PASSWORD_INPUT_ELEMENT)))
+        search_input.click()
+        time.sleep(random.uniform(0.1, 0.3))
+
+        fake_paste_events(self.driver, search_input, Env.NAVER_PASSWORD)
 
         search_input.send_keys(Keys.ENTER)
         time.sleep(2)
