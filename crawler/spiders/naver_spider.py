@@ -39,6 +39,8 @@ class NaverSpider:
         self.count += 1
         print(f'========== [{self.count} / {self.size}] ==========')
 
+        if self.count % 200 == 0: time.sleep(30)
+
         self.driver.get(Constant.SEARCH_URL(obj['keyword']))
         time.sleep(1.2)
 
