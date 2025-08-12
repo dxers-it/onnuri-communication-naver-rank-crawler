@@ -2,13 +2,15 @@ from selenium import webdriver
 
 import random, time
 
-def set_chrome_driver() -> webdriver.Chrome:
+def set_chrome_driver(user_data_dir: str | None = None, remote_debugging_port: int | None = None) -> webdriver.Chrome:
     """
     ChromeDriver 의 기본 옵션을 설정해서 반환합니다.
     - 자동화 탐지 방지 플래그
     - 로그 레벨, 시크릿 모드, 캐시 비활성화 등
     """
     options = webdriver.ChromeOptions()
+    if user_data_dir: options.add_argument(f"--user-data-dir={user_data_dir}")
+    if remote_debugging_port: options.add_argument(f"--remote-debugging-port={remote_debugging_port}")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)

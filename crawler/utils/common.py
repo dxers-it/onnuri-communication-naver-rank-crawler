@@ -1,4 +1,5 @@
 from datetime import datetime
+from ..settings import Constant
 
 import os, json
 
@@ -12,6 +13,9 @@ def get_korean_datetime_string():
         hour = 12
 
     return f"{dt.year}. {dt.month}. {dt.day} {am_pm} {hour}:{dt.minute:02d}:{dt.second:02d}"
+
+def compare_title(title, obj):
+    return title.replace(' ', '') == obj['title'].replace(' ', '')
 
 def compare_subject(subject: str, keyword: str):
     return subject.replace(' ', '') == keyword.replace(' ', '')
@@ -47,3 +51,6 @@ def conversion_list(adults, not_adults):
         datetimes[index][0] = result['datetime']
 
     return ranks, datetimes
+
+def chunked(list):
+    return [list[index: index + Constant.CHUNK_SIZE] for index in range(0, len(list), Constant.CHUNK_SIZE)]

@@ -61,7 +61,7 @@ NAVER_PASSWORD='네이버 비밀번호'
 #################### DO NOT CHANGE ####################
 #################### DO NOT CHANGE ####################
 VERSION='1.0.0'
-SCOPE_FILENAME='token.json'
+SCOPE_FILENAME='cred.json'
 SCOPE='https://www.googleapis.com/auth/spreadsheets'
 NAVER_LOGIN_URL='https://nid.naver.com/nidlogin.login'
 #################### DO NOT CHANGE ####################

@@ -24,8 +24,11 @@ class Env:
     NAVER_LOGIN_URL = os.getenv('NAVER_LOGIN_URL')
     NAVER_ID = os.getenv('NAVER_ID')
     NAVER_PASSWORD = os.getenv('NAVER_PASSWORD')
+    MAX_WORKERS = os.getenv('MAX_WORKERS')
 
 class Constant:
+
+    CHUNK_SIZE = 200
 
     NAVER_ID_INPUT_ID = 'id'
     NAVER_PASSWORD_INPUT_ID = 'pw'
@@ -34,6 +37,7 @@ class Constant:
     NAVER_PASSWORD_INPUT_ELEMENT =  'input[id="pw"]'
 
     NAVER_POPULAR_POST_CSS_SELECTOR = '[data-slog-container="ugB_bsR"]'
+    NAVER_POPULAR_CAFE_POST_CSS_SELECTOR = '[data-slog-container="ugB_ctR"]'
     NAVER_NAME_POPULAR_POST_CSS_SELECTOR = '[data-slog-container="ugB_qpR"]'
     NAVER_SMART_BLOCK_1_CSS_SELECTOR = '[data-slog-container="ugB_b1R"]'
     NAVER_SMART_BLOCK_2_CSS_SELECTOR = '[data-slog-container="ugB_b2R"]'
