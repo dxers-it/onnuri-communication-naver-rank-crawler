@@ -38,6 +38,7 @@ class Constant:
 
     NAVER_POPULAR_POST_CSS_SELECTOR = '[data-slog-container="ugB_bsR"]'
     NAVER_POPULAR_CAFE_POST_CSS_SELECTOR = '[data-slog-container="ugB_ctR"]'
+    NAVER_POPULAR_INFLUENCER_POST_CSS_SELECTOR = '[data-slog-container="ugB_ipR"]'
     NAVER_NAME_POPULAR_POST_CSS_SELECTOR = '[data-slog-container="ugB_qpR"]'
     NAVER_SMART_BLOCK_1_CSS_SELECTOR = '[data-slog-container="ugB_b1R"]'
     NAVER_SMART_BLOCK_2_CSS_SELECTOR = '[data-slog-container="ugB_b2R"]'

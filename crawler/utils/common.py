@@ -15,10 +15,10 @@ def get_korean_datetime_string():
     return f"{dt.year}. {dt.month}. {dt.day} {am_pm} {hour}:{dt.minute:02d}:{dt.second:02d}"
 
 def compare_title(title, obj):
-    return title.replace(' ', '') == obj['title'].replace(' ', '')
+    return title.replace(' ', '') == obj['title'].replace(' ', '').replace('\r', '').replace('\n', '').replace(' ', '')
 
 def compare_subject(subject: str, keyword: str):
-    return subject.replace(' ', '') == keyword.replace(' ', '')
+    return subject.replace(' ', '') == keyword.replace(' ', '').replace('\r', '').replace('\n', '').replace(' ', '')
 
 def saveJsonFile(obj, name):
     os.path.join('data', f'{name}.json')

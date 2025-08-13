@@ -1,4 +1,4 @@
-from ..utils.common import get_korean_datetime_string, compare_title, compare_subject, conversion_list, chunked
+from ..utils.common import get_korean_datetime_string, compare_title, compare_subject, conversion_list, chunked, saveJsonFile
 from ..utils.selenium_utils import set_chrome_driver, human_scroll, fake_paste_events
 from ..pipelines.google_sheets import GoogleSheet
 from ..settings import Constant, Env
@@ -82,10 +82,10 @@ class NaverSpider:
 
         human_scroll(driver)
 
-        match obj['popular_theme']:
-            case '' | '인기글': self._check_view(obj, driver)
-            case '인기 카페글': self._check_cafe_view(obj, driver)
-            case _: self._check_smart_view(obj, driver)
+        if obj['popular_theme'] == '' or obj['popular_theme'] == '인기글': self._check_view(obj, driver)
+        elif obj['popular_theme'].replace(' ', '') == '인기카페글': self._check_cafe_view(obj, driver)
+        elif '인플루언서콘텐츠' in obj['popular_theme'].replace(' ', ''): self._check_influencer_view(obj, driver)
+        else: self._check_smart_view(obj, driver)
 
 
 
@@ -158,6 +158,28 @@ class NaverSpider:
         obj['datetime'] = get_korean_datetime_string()
 
 
+    def _check_influencer_view(self, obj, driver):
+        section, selector = None, None
+        selectors = [
+            Constant.NAVER_POPULAR_INFLUENCER_POST_CSS_SELECTOR, 
+            Constant.NAVER_ADULT_CLASS
+        ]
+
+        for css_selector in selectors:
+            try:
+                section = driver.find_element(By.CSS_SELECTOR, css_selector)
+                selector = css_selector
+                break
+            except:
+                continue
+
+        match selector:
+            case Constant.NAVER_ADULT_CLASS: obj['rank'] = '성인 인증 확인 필요'
+            case Constant.NAVER_POPULAR_INFLUENCER_POST_CSS_SELECTOR: self._check_influencer_post(section, obj)
+
+        obj['datetime'] = get_korean_datetime_string()
+
+
     def _check_popular_post(self, section, obj):
         
         list_view = section.find_element(By.CLASS_NAME, 'lst_view')
@@ -171,7 +193,7 @@ class NaverSpider:
                 rank = index + 1
                 break
         
-        obj['rank'] = '' if rank == 0 else (f'{rank}위')
+        obj['rank'] = '' if rank == 0 else (f'{rank}')
 
 
     def _check_name_popular_post(self, section, obj):
@@ -191,7 +213,26 @@ class NaverSpider:
                 rank = index + 1
                 break
 
-        obj['rank'] = '' if rank == 0 else (f'{rank}위')
+        obj['rank'] = '' if rank == 0 else (f'{rank}')
+
+
+    def _check_influencer_post(self, section, obj):
+        ugcItemMo_list = section.find_elements(
+            By.CSS_SELECTOR,
+            '[data-template-id="ugcItemMo"]'
+        )
+
+        rank = 0
+        for index in range(0, len(ugcItemMo_list)):
+            ugcItemMo = ugcItemMo_list[index]
+
+            title = ugcItemMo.find_element(By.CSS_SELECTOR, '.fds-comps-text.t0Gnpaae9B2Qr5RidZYS.ellipsis2').text
+            
+            if compare_title(title, obj): 
+                rank = index + 1
+                break
+
+        obj['rank'] = '' if rank == 0 else (f'{rank}')
 
 
     def _check_smart_view(self, obj, driver):
@@ -236,7 +277,7 @@ class NaverSpider:
                 rank = index + 1
                 break
 
-        obj['rank'] = '' if rank == 0 else (f'{rank}위')
+        obj['rank'] = '' if rank == 0 else (f'{rank}')
 
     def _check_other_block(self, obj, driver):
         elements = []
@@ -264,4 +305,4 @@ class NaverSpider:
                 rank = index + 1
                 break
         
-        obj['rank'] = '' if rank == 0 else (f'{rank}위')
+        obj['rank'] = '' if rank == 0 else (f'{rank}')
