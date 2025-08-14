@@ -19,20 +19,20 @@ class NaverSpider:
     네이버 블로그 글 순위 스파이더(크롤러):
     - 
     """
-    def __init__(self):
+    def __init__(self, sheet_obj):
         
         print('==================== 🤗 네이버 블로그 순위 크롤링 시작 ====================')
 
-        self.google_sheet_instance = GoogleSheet()
-        self.not_adults, self.adults = self.google_sheet_instance.get_sheet_values()
+        self.google_sheet_instance = GoogleSheet(sheet_obj)
+        self.not_logins, self.logins = self.google_sheet_instance.get_sheet_values()
         self.count = 0
-        self.size = len(self.not_adults) + len(self.adults)
+        self.size = len(self.not_logins) + len(self.logins)
 
 
     def crawl(self):
 
-        not_adults_chunks = chunked(self.not_adults)
-        adult_chunks = chunked(self.adults)
+        not_login_chunks = chunked(self.not_logins)
+        login_chunks = chunked(self.logins)
         
         results = []
         with ThreadPoolExecutor(max_workers=3) as executor:
@@ -40,11 +40,11 @@ class NaverSpider:
            
             futures += [
                 executor.submit(self._each_task, index, chunk)
-                for index, chunk in enumerate(not_adults_chunks)
+                for index, chunk in enumerate(not_login_chunks)
             ]
             futures += [
                 executor.submit(self._each_task, index, chunk, self._login)
-                for index, chunk in enumerate(adult_chunks, start=len(not_adults_chunks))
+                for index, chunk in enumerate(login_chunks, start=len(not_login_chunks))
             ]
 
             for future in as_completed(futures):
@@ -52,7 +52,7 @@ class NaverSpider:
                 results.append(result)
 
         if all(results):
-            ranks, datetimes = conversion_list(self.adults, self.not_adults)
+            ranks, datetimes = conversion_list(self.logins, self.not_logins)
             self.google_sheet_instance.set_result_values(ranks, datetimes)
 
 
@@ -82,9 +82,9 @@ class NaverSpider:
 
         human_scroll(driver)
 
-        if obj['popular_theme'] == '' or obj['popular_theme'] == '인기글': self._check_view(obj, driver)
-        elif obj['popular_theme'].replace(' ', '') == '인기카페글': self._check_cafe_view(obj, driver)
-        elif '인플루언서콘텐츠' in obj['popular_theme'].replace(' ', ''): self._check_influencer_view(obj, driver)
+        if '' == obj['popular_theme'] or '인기글' == obj['popular_theme']: self._check_view(obj, driver)
+        elif '인기카페글' == obj['popular_theme']: self._check_cafe_view(obj, driver)
+        elif '인플루언서콘텐츠' in obj['popular_theme']: self._check_influencer_view(obj, driver)
         else: self._check_smart_view(obj, driver)
 
 

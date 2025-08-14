@@ -11,14 +11,16 @@ from ..utils.common import column_index_to_letter
 
 class GoogleSheet:
 
-    def __init__(self):
+    def __init__(self, sheet_obj):
         self.service = self._init_service()
-        self.keyword_range_name = f'{Env.SPREADSHEET_NAME}!{Env.KEYWORD_START_COLUMN}:{Env.KEYWORD_COLUMN}'
-        self.popular_theme_range_name = f'{Env.SPREADSHEET_NAME}!{Env.POPULAR_THEME_START_COLUMN}:{Env.POPULAR_THEME_COLUMN}'
-        self.title_keyword_range_name = f'{Env.SPREADSHEET_NAME}!{Env.TITLE_START_COLUMN}:{Env.TITLE_COLUMN}'
-        self.adult_keyword_range_name = f'{Env.SPREADSHEET_NAME}!{Env.ADULT_KEYWORD_START_COLUMN}:{Env.ADULT_KEYWORD_COLUMN}'
-        self.column_name_range_name = f'{Env.SPREADSHEET_NAME}!{Env.COLUMN_NAME_ROW}:{Env.COLUMN_NAME_ROW}'
-        self.datetime_range_name = f'{Env.SPREADSHEET_NAME}!{Env.DATETIME_START_COLUMN}:{Env.DATETIME_COLUMN}'
+        self.sheet_obj = sheet_obj
+        self.sheet_id = sheet_obj.sheet_id
+        self.keyword_range_name = f'{sheet_obj.sheet_name}!{sheet_obj.keyword_start_column}:{sheet_obj.keyword_column}'
+        self.popular_theme_range_name = f'{sheet_obj.sheet_name}!{sheet_obj.popular_theme_start_column}:{sheet_obj.popular_theme_column}'
+        self.title_keyword_range_name = f'{sheet_obj.sheet_name}!{sheet_obj.title_start_column}:{sheet_obj.title_column}'
+        self.login_range_name = f'{sheet_obj.sheet_name}!{sheet_obj.login_start_column}:{sheet_obj.login_column}'
+        self.column_name_range_name = f'{sheet_obj.sheet_name}!{sheet_obj.column_name_row}:{sheet_obj.column_name_row}'
+        self.datetime_range_name = f'{sheet_obj.sheet_name}!{sheet_obj.datetime_start_column}:{sheet_obj.datetime_column}'
         self._ensure_columns()
         self._get_today_column()
     
@@ -27,22 +29,22 @@ class GoogleSheet:
         self.keywords = self._fetch_sheet_values(self.keyword_range_name)
         self.popular_themes = self._fetch_sheet_values(self.popular_theme_range_name)
         self.titles = self._fetch_sheet_values(self.title_keyword_range_name)
-        self.adult_keywords = self._fetch_sheet_values(self.adult_keyword_range_name)
+        self.login_keywords = self._fetch_sheet_values(self.login_range_name)
         self._set_values_length()
 
-        not_adults, adults = self._grouping_adults()
-        return not_adults, adults
+        not_logins, logins = self._grouping_logins()
+        return not_logins, logins
         
 
     def set_result_values(self, ranks, datetimes):
-        self._update_sheet_values(f'{Env.SPREADSHEET_NAME}!{self.insert_column}{Env.START_ROW}:{self.insert_column}', ranks)
+        self._update_sheet_values(f'{self.sheet_obj.sheet_name}!{self.insert_column}{self.sheet_obj.start_row}:{self.insert_column}', ranks)
         self._update_sheet_values(self.datetime_range_name, datetimes)
 
 
     def _update_sheet_values(self, range_name: str, values: list):
         body = { 'values': values }
         self.service.spreadsheets().values().update(
-            spreadsheetId=Env.SPREADSHEET_ID,
+            spreadsheetId=self.sheet_id,
             range=range_name,
             valueInputOption='RAW',
             body=body
@@ -53,7 +55,7 @@ class GoogleSheet:
         if self.service == None: return []
 
         sheet = self.service.spreadsheets()
-        result = sheet.values().get(spreadsheetId=Env.SPREADSHEET_ID, range=range_name, ).execute()
+        result = sheet.values().get(spreadsheetId=self.sheet_id, range=range_name, ).execute()
 
         return result.get('values', [])
     
@@ -86,24 +88,24 @@ class GoogleSheet:
         if index != -1: self.insert_column = column_index_to_letter(index + 1)
         else: 
             self.insert_column = column_index_to_letter(len(column_names[0]) + 1)
-            self._update_sheet_values(f'{Env.SPREADSHEET_NAME}!{self.insert_column}{Env.COLUMN_NAME_ROW}', [[month_day]])
+            self._update_sheet_values(f'{self.sheet_obj.sheet_name}!{self.insert_column}{self.sheet_obj.column_name_row}', [[month_day]])
 
 
     def _set_values_length(self):
         while len(self.popular_themes) < len(self.keywords): self.popular_themes.append([])
         while len(self.titles) < len(self.keywords): self.titles.append([])
-        while len(self.adult_keywords) < len(self.keywords): self.adult_keywords.append([])
+        while len(self.login_keywords) < len(self.keywords): self.login_keywords.append([])
 
         for popular_theme in self.popular_themes:
             if len(popular_theme) == 0: popular_theme.append('')
         for title in self.titles:
             if len(title) == 0: title.append('')
 
-    def _grouping_adults(self):
-        notAdults, adults = [], []
+    def _grouping_logins(self):
+        not_logins, logins = [], []
 
         for index in range(0, len(self.keywords)):
-            row = index + Env.START_ROW
+            row = index + self.sheet_obj.start_row
 
             title = self.titles[index][0] if len(self.titles[index]) == 1 else ''
             keyword = self.keywords[index][0]
@@ -112,34 +114,34 @@ class GoogleSheet:
 
             value = { 
                 'row': row, 
-                'title': title, 
+                'title': title.replace(' ', '').replace('\r', '').replace('\n', '').replace(' ', ''), 
                 'keyword': keyword, 
-                'popular_theme': popular_theme, 
+                'popular_theme': popular_theme.replace(' ', '').replace('\r', '').replace('\n', '').replace(' ', '') ,
                 'rank': rank 
             }
 
-            if len(self.adult_keywords[index]) == 0: notAdults.append(value)
-            else: adults.append(value)
+            if len(self.login_keywords[index]) == 0: not_logins.append(value)
+            else: logins.append(value)
 
-        return notAdults, adults
+        return not_logins, logins
     
 
     def _get_sheet_meta(self):
         meta = self.service.spreadsheets().get(
-            spreadsheetId=Env.SPREADSHEET_ID,
+            spreadsheetId=self.sheet_id,
             fields="sheets(properties(sheetId,title,gridProperties(columnCount)))"
         ).execute()
 
         for sheet in meta["sheets"]:
             props = sheet["properties"]
-            if props["title"] == Env.SPREADSHEET_NAME:
+            if props["title"] == self.sheet_obj.sheet_name:
                 return props["sheetId"], props["gridProperties"]["columnCount"]
             
 
     def _get_last_used_column(self):
-        rng = f"{Env.SPREADSHEET_NAME}!{Env.COLUMN_NAME_ROW}:{Env.COLUMN_NAME_ROW}"
+        rng = f"{self.sheet_obj.sheet_name}!{self.sheet_obj.column_name_row}:{self.sheet_obj.column_name_row}"
         response = self.service.spreadsheets().values().get(
-            spreadsheetId=Env.SPREADSHEET_ID, range=rng, majorDimension="ROWS"
+            spreadsheetId=self.sheet_id, range=rng, majorDimension="ROWS"
         ).execute()
         values = response.get("values", [[]])
         row = values[0] if values else []
@@ -172,6 +174,6 @@ class GoogleSheet:
             }]
         }
         self.service.spreadsheets().batchUpdate(
-            spreadsheetId=Env.SPREADSHEET_ID,
+            spreadsheetId=self.sheet_id,
             body=body
         ).execute()

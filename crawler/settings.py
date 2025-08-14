@@ -1,26 +1,32 @@
 import os
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
+from .utils.classes import SheetObject
 
 load_dotenv()
 
 class Env:
     SCOPE_FILENAME = os.getenv('SCOPE_FILENAME', 'token.json')
     SCOPES = [os.getenv('SCOPE', 'https://www.googleapis.com/auth/spreadsheets')]
-    SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
-    SPREADSHEET_NAME = os.getenv('SPREADSHEET_NAME')
-    START_ROW = int(os.getenv('START_ROW'))
-    KEYWORD_COLUMN = os.getenv('KEYWORD_COLUMN')
-    KEYWORD_START_COLUMN = os.getenv('KEYWORD_COLUMN') + os.getenv('START_ROW')
-    POPULAR_THEME_COLUMN = os.getenv('POPULAR_THEME_COLUMN')
-    POPULAR_THEME_START_COLUMN = os.getenv('POPULAR_THEME_COLUMN') + os.getenv('START_ROW')
-    TITLE_COLUMN = os.getenv('TITLE_COLUMN')
-    TITLE_START_COLUMN = os.getenv('TITLE_COLUMN') + os.getenv('START_ROW')
-    ADULT_KEYWORD_COLUMN = os.getenv('ADULT_KEYWORD_COLUMN')
-    ADULT_KEYWORD_START_COLUMN = os.getenv('ADULT_KEYWORD_COLUMN') + os.getenv('START_ROW')
-    DATETIME_COLUMN = os.getenv('DATETIME_COLUMN')
-    DATETIME_START_COLUMN = os.getenv('DATETIME_COLUMN') + os.getenv('START_ROW')
-    COLUMN_NAME_ROW = os.getenv('COLUMN_NAME_ROW')
+
+    INST_OBJ = SheetObject('INST')
+    NEWTRI_OBJ = SheetObject('NEWTRI')
+
+    # SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
+    # SPREADSHEET_NAME = os.getenv('SPREADSHEET_NAME')
+    # START_ROW = int(os.getenv('START_ROW'))
+    # KEYWORD_COLUMN = os.getenv('KEYWORD_COLUMN')
+    # KEYWORD_START_COLUMN = os.getenv('KEYWORD_COLUMN') + os.getenv('START_ROW')
+    # POPULAR_THEME_COLUMN = os.getenv('POPULAR_THEME_COLUMN')
+    # POPULAR_THEME_START_COLUMN = os.getenv('POPULAR_THEME_COLUMN') + os.getenv('START_ROW')
+    # TITLE_COLUMN = os.getenv('TITLE_COLUMN')
+    # TITLE_START_COLUMN = os.getenv('TITLE_COLUMN') + os.getenv('START_ROW')
+    # ADULT_KEYWORD_COLUMN = os.getenv('ADULT_KEYWORD_COLUMN')
+    # ADULT_KEYWORD_START_COLUMN = os.getenv('ADULT_KEYWORD_COLUMN') + os.getenv('START_ROW')
+    # DATETIME_COLUMN = os.getenv('DATETIME_COLUMN')
+    # DATETIME_START_COLUMN = os.getenv('DATETIME_COLUMN') + os.getenv('START_ROW')
+    # COLUMN_NAME_ROW = os.getenv('COLUMN_NAME_ROW')
+
     NAVER_LOGIN_URL = os.getenv('NAVER_LOGIN_URL')
     NAVER_ID = os.getenv('NAVER_ID')
     NAVER_PASSWORD = os.getenv('NAVER_PASSWORD')
