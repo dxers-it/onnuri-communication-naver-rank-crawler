@@ -31,24 +31,23 @@ pip install python-dotenv selenium pyautogui pyperclip google-auth google-auth-o
 `.env` 파일을 프로젝트 루트에 생성하고 다음 예시를 참고하여 환경변수를 설정하세요.
 ```env
 ## 스프레드 시트 아이디 ##
-SPREADSHEET_ID='스프레드 시트 아이디'
+객체코드_SPREADSHEET_ID='스프레드 시트 아이디'
 ## 스프레드 시트 이름 ##
-SPREADSHEET_NAME='스프레드 시트 이름'
-
+객체코드_SHEET_NAME='스프레드 시트 이름'
 ## 컬럼 이름 행 번호 ##
-COLUMN_NAME_ROW=컬럼 이름 행 번호
+객체코드_COLUMN_NAME_ROW=컬럼 이름 행 번호
 ## 데이터 입력 첫 행 번호 ##
-START_ROW=데이터 입력 첫 행 번호
+객체코드_START_ROW=데이터 입력 첫 행 번호
 ## 검색 키워드 열 이름 ##
-KEYWORD_COLUMN='검색 키워드 열 이름'
+객체코드_KEYWORD_COLUMN='검색 키워드 열 이름'
 ## 인기 주제 열 이름 ##
-POPULAR_THEME_COLUMN='인기 주제 열 이름'
+객체코드_POPULAR_THEME_COLUMN='인기 주제 열 이름'
 ## 제목 열 이름 ##
-TITLE_COLUMN='제목 열 이름'
-## 성인키 열 이름 ##
-ADULT_KEYWORD_COLUMN='성인키 열 이름'
+객체코드_TITLE_COLUMN='제목 열 이름'
+## 로그인 작업 열 이름 ##
+객체코드_LOGIN_COLUMN='로그인키 열 이름'
 ## 확인시각 열 이름 ##
-DATETIME_COLUMN='확인시각 열 이름'
+객체코드_DATETIME_COLUMN='확인시각 열 이름'
 
 ## 네이버 아이디 ##
 NAVER_ID='네이버 아이디'
@@ -64,6 +63,25 @@ VERSION='1.0.0'
 SCOPE_FILENAME='cred.json'
 SCOPE='https://www.googleapis.com/auth/spreadsheets'
 NAVER_LOGIN_URL='https://nid.naver.com/nidlogin.login'
+
+## 스프레드 시트 아이디 ##
+객체코드_SPREADSHEET_ID='스프레드 시트 아이디'
+## 스프레드 시트 이름 ##
+객체코드_SHEET_NAME='스프레드 시트 이름'
+## 컬럼 이름 행 번호 ##
+객체코드_COLUMN_NAME_ROW=컬럼 이름 행 번호
+## 데이터 입력 첫 행 번호 ##
+객체코드_START_ROW=데이터 입력 첫 행 번호
+## 검색 키워드 열 이름 ##
+객체코드_KEYWORD_COLUMN='검색 키워드 열 이름'
+## 인기 주제 열 이름 ##
+객체코드_POPULAR_THEME_COLUMN='인기 주제 열 이름'
+## 제목 열 이름 ##
+객체코드_TITLE_COLUMN='제목 열 이름'
+## 로그인 작업 열 이름 ##
+객체코드_LOGIN_COLUMN='로그인키 열 이름'
+## 확인시각 열 이름 ##
+객체코드_DATETIME_COLUMN='확인시각 열 이름'
 #################### DO NOT CHANGE ####################
 #################### DO NOT CHANGE ####################
 #################### DO NOT CHANGE ####################
