@@ -42,4 +42,4 @@ if not any(isinstance(h, (TimedRotatingFileHandler, logging.FileHandler)) for h 
     logger.addHandler(_file_handler)
 
 logger.info(f'Initializing crawler package (version {__version__})')
-logger.info(f'Logging to: {(LOG_DIR / 'crawler.log').as_posix()}')
+logger.info(f'Logging to: {(LOG_DIR / "crawler.log").as_posix()}')

@@ -51,6 +51,8 @@ class Constant:
     NAVER_SMART_BLOCK_3_CSS_SELECTOR = '[data-slog-container="ugB_b3R"]'
     NAVER_SMART_BLOCK_4_CSS_SELECTOR = '[data-slog-container="ugB_b3R"]'
     NAVER_SMART_BLOCK_5_CSS_SELECTOR = '[data-slog-container="ugB_b3R"]'
+    NAVER_SMART_BLOCK_6_CSS_SELECTOR = '[data-slog-container="urB_coR"]'
+    NAVER_SMART_BLOCK_7_CSS_SELECTOR = '[data-slog-container="urB_boR"]'
     NAVER_ADULT_CLASS = 'group_adult'
     
     NAVER_OTHERS_BLOCK_CLASS = 'spw_rerank'

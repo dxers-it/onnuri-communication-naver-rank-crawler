@@ -59,13 +59,15 @@ class NaverSpider:
     def _each_task(self, chunk_index, chunk_list, _login = None):
         tmp_profile = tempfile.mkdtemp(prefix=f"selenium_profile_{chunk_index}_")
         driver = set_chrome_driver(user_data_dir=tmp_profile, remote_debugging_port=9222 + chunk_index)
+
         if _login: _login(driver)
 
         try:
             for item in chunk_list: 
                 self._check_rank(driver, item)
             return True
-        except:
+        except Exception as e:
+            print(e)
             return False
         finally:
             if driver:
@@ -82,9 +84,10 @@ class NaverSpider:
 
         human_scroll(driver)
 
-        if '' == obj['popular_theme'] or '인기글' == obj['popular_theme']: self._check_view(obj, driver)
+        if '인기글' == obj['popular_theme']: self._check_view(obj, driver)
         elif '인기카페글' == obj['popular_theme']: self._check_cafe_view(obj, driver)
         elif '인플루언서콘텐츠' in obj['popular_theme']: self._check_influencer_view(obj, driver)
+        elif '' == obj['popular_theme']: self._check_new_view(obj, driver)
         else: self._check_smart_view(obj, driver)
 
 
@@ -124,13 +127,13 @@ class NaverSpider:
                 section = driver.find_element(By.CSS_SELECTOR, css_selector)
                 selector = css_selector
                 break
-            except:
+            except Exception as e:
                 continue
 
         match selector:
             case Constant.NAVER_ADULT_CLASS: obj['rank'] = '성인 인증 확인 필요'
-            case Constant.NAVER_POPULAR_POST_CSS_SELECTOR: self._check_popular_post(section, obj)
-            case Constant.NAVER_NAME_POPULAR_POST_CSS_SELECTOR: self._check_name_popular_post(section, obj)
+            case Constant.NAVER_POPULAR_POST_CSS_SELECTOR: self._check_post(section, obj)
+            case Constant.NAVER_NAME_POPULAR_POST_CSS_SELECTOR: self._check_post(section, obj)
             case _: self._check_other_block(obj, driver)
 
         obj['datetime'] = get_korean_datetime_string()
@@ -148,12 +151,12 @@ class NaverSpider:
                 section = driver.find_element(By.CSS_SELECTOR, css_selector)
                 selector = css_selector
                 break
-            except:
+            except Exception as e:
                 continue
 
         match selector:
             case Constant.NAVER_ADULT_CLASS: obj['rank'] = '성인 인증 확인 필요'
-            case Constant.NAVER_POPULAR_CAFE_POST_CSS_SELECTOR: self._check_name_popular_post(section, obj)
+            case Constant.NAVER_POPULAR_CAFE_POST_CSS_SELECTOR: self._check_post(section, obj)
 
         obj['datetime'] = get_korean_datetime_string()
 
@@ -170,28 +173,46 @@ class NaverSpider:
                 section = driver.find_element(By.CSS_SELECTOR, css_selector)
                 selector = css_selector
                 break
-            except:
+            except Exception as e:
                 continue
 
         match selector:
             case Constant.NAVER_ADULT_CLASS: obj['rank'] = '성인 인증 확인 필요'
-            case Constant.NAVER_POPULAR_INFLUENCER_POST_CSS_SELECTOR: self._check_influencer_post(section, obj)
+            case Constant.NAVER_POPULAR_INFLUENCER_POST_CSS_SELECTOR: self._check_post(section, obj)
 
         obj['datetime'] = get_korean_datetime_string()
+
+    def _check_post(self, section, obj):
+        
+        item_list = section.find_element(By.CSS_SELECTOR, '[class$="item-list"]')
+        titles = item_list.find_elements(By.CLASS_NAME, 'sds-comps-text-type-headline1')
+
+        rank = 0
+        for index in range(0, len(titles)):
+            try:
+                title = titles[index].text
+                if compare_title(title, obj):
+                    rank = index + 1
+                    break
+            except Exception as e:
+                continue
+        
+        obj['rank'] = '' if rank == 0 else (f'{rank}')
 
 
     def _check_popular_post(self, section, obj):
         
-        list_view = section.find_element(By.CLASS_NAME, 'lst_view')
-        lis = list_view.find_elements(By.CLASS_NAME, '_slog_visible')
+        titles = section.find_elements(By.CLASS_NAME, 'sds-comps-text-type-headline1')
 
         rank = 0
-        for index in range(0, len(lis)):
-            li = lis[index]
-            title = li.find_element(By.CLASS_NAME, 'title_area').text
-            if compare_title(title, obj):
-                rank = index + 1
-                break
+        for index in range(0, len(titles)):
+            try:
+                title = titles[index].text
+                if compare_title(title, obj):
+                    rank = index + 1
+                    break
+            except Exception as e:
+                continue
         
         obj['rank'] = '' if rank == 0 else (f'{rank}')
 
@@ -206,12 +227,14 @@ class NaverSpider:
 
         rank = 0
         for index in range(0, len(fds_ugc_block_mod_list)):
-            fds_ugc_block_mod = fds_ugc_block_mod_list[index]
-            title = fds_ugc_block_mod.find_element(By.CLASS_NAME, 'fds-comps-right-image-text-title').text
-        
-            if compare_title(title, obj): 
-                rank = index + 1
-                break
+            try:
+                fds_ugc_block_mod = fds_ugc_block_mod_list[index]
+                title = fds_ugc_block_mod.find_element(By.CLASS_NAME, 'fds-comps-right-image-text-title').text
+                if compare_title(title, obj): 
+                    rank = index + 1
+                    break
+            except Exception as e:
+                continue
 
         obj['rank'] = '' if rank == 0 else (f'{rank}')
 
@@ -224,13 +247,15 @@ class NaverSpider:
 
         rank = 0
         for index in range(0, len(ugcItemMo_list)):
-            ugcItemMo = ugcItemMo_list[index]
+            try:
+                ugcItemMo = ugcItemMo_list[index]
 
-            title = ugcItemMo.find_element(By.CSS_SELECTOR, '.fds-comps-text.t0Gnpaae9B2Qr5RidZYS.ellipsis2').text
-            
-            if compare_title(title, obj): 
-                rank = index + 1
-                break
+                title = ugcItemMo.find_element(By.CSS_SELECTOR, 'a[data-cb-api]').text
+                if compare_title(title, obj): 
+                    rank = index + 1
+                    break
+            except Exception as e:
+                continue
 
         obj['rank'] = '' if rank == 0 else (f'{rank}')
 
@@ -249,33 +274,68 @@ class NaverSpider:
         for css_selector in selectors:
             try:
                 section = driver.find_element(By.CSS_SELECTOR, css_selector)
-                subject = section.find_element(By.CLASS_NAME, 'fds-comps-header-headline').text
+                subject = section.find_element(By.CLASS_NAME, 'sds-comps-header-title').text
                 if compare_subject(subject, obj['popular_theme']):
                     selector = css_selector
                     break
-            except:
+            except Exception as e:
                 continue
         
         match selector:
             case None: obj['rank'] = '블록X'
-            case _: self._check_smart_block(section, obj)
+            case _: self._check_post(section, obj)
 
         obj['datetime'] = get_korean_datetime_string()
 
 
+
+    def _check_new_view(self, obj, driver):
+        section, selector = None, None
+
+        selectors = [
+            Constant.NAVER_SMART_BLOCK_6_CSS_SELECTOR,
+            Constant.NAVER_SMART_BLOCK_7_CSS_SELECTOR,
+        ]
+        
+        rank, index = 0, 0
+
+        for css_selector in selectors:
+            try:
+                section = driver.find_element(By.CSS_SELECTOR, css_selector)
+                if css_selector in 'urB_boR':
+                    urB_oRs = section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_boR"]')
+                else:
+                    urB_oRs = section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_coR"]')
+
+
+                for urB_oR in urB_oRs:
+                    href = urB_oR.find_element(By.TAG_NAME, 'a').get_attribute('href')
+                    if ('blog.naver' in href) or ('cafe.naver' in href) or ('kin.naver' in href):
+                        index += 1
+
+                        title = urB_oR.find_element(By.CLASS_NAME, 'sds-comps-text-type-headline1').text
+                        if compare_title(title, obj): 
+                            rank = index + 1
+                            break
+            except Exception as e:
+                continue
+
+        obj['rank'] = '' if rank == 0 else (f'{rank}')
+        obj['datetime'] = get_korean_datetime_string()
+
+
     def _check_smart_block(self, section, obj):
-        fds_ugc_block_mod_list = section.find_elements(
-            By.CSS_SELECTOR,
-            ".fds-ugc-block-mod-list > div:not(.fds-ugc-cross-keyword)"
-        )
+        titles = section.find_elements(By.CLASS_NAME,"sds-comps-text-type-headline1")
 
         rank = 0
-        for index in range(0, len(fds_ugc_block_mod_list)):
-            fds_ugc_block_mod = fds_ugc_block_mod_list[index]
-            title = fds_ugc_block_mod.find_element(By.CLASS_NAME, 'fds-comps-right-image-text-title').text
-            if compare_title(title, obj): 
-                rank = index + 1
-                break
+        for index in range(0, len(titles)):
+            try:
+                title = titles[index].text
+                if compare_title(title, obj): 
+                    rank = index + 1
+                    break
+            except Exception as e:
+                continue
 
         obj['rank'] = '' if rank == 0 else (f'{rank}')
 
@@ -284,11 +344,14 @@ class NaverSpider:
         spw_reranks = driver.find_elements(By.CLASS_NAME, 'spw_rerank')
 
         for spw_rerank in spw_reranks:
-            element_items = spw_rerank.find_elements(
-                By.CSS_SELECTOR,
-                '.sp_nreview, [data-slog-container="rrB_hdR"]'
-            )
-            elements.extend(element_items)
+            try:
+                element_items = spw_rerank.find_elements(
+                    By.CSS_SELECTOR,
+                    '.sp_nreview, [data-slog-container="rrB_hdR"]'
+                )
+                elements.extend(element_items)
+            except Exception as e:
+                continue
 
         title_classes = ['title_area', 'sds-comps-text-type-headline1']
         rank = 0
@@ -299,7 +362,7 @@ class NaverSpider:
                 try:
                     title = elements[index].find_element(By.CLASS_NAME, title_class).text
                     break
-                except:
+                except Exception as e:
                     continue
             if compare_title(title, obj): 
                 rank = index + 1

@@ -5,7 +5,10 @@ import time
 def main():
     start_time = time.time()
 
-    spiders = [NaverSpider(Env.INST_OBJ), NaverSpider(Env.NEWTRI_OBJ)]
+    spiders = [
+        NaverSpider(Env.INST_OBJ), 
+        # NaverSpider(Env.NEWTRI_OBJ)
+    ]
     for spider in spiders: spider.crawl()
 
     end_time = time.time()
