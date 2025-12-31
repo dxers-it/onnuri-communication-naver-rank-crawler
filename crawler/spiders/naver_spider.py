@@ -291,13 +291,40 @@ class NaverSpider:
 
     def _check_new_view(self, obj, driver):
         section, selector = None, None
+        
+        rank, index = 0, 0
+
+        selectors = [
+            Constant.NAVER_POPULAR_POST_CSS_SELECTOR, 
+            Constant.NAVER_NAME_POPULAR_POST_CSS_SELECTOR,
+            Constant.NAVER_ADULT_CLASS
+        ]
+
+        for css_selector in selectors:
+            try:
+                section = driver.find_element(By.CSS_SELECTOR, css_selector)
+                break
+            except Exception as e:
+                continue
+
+        if section:
+            item_list = section.find_element(By.CSS_SELECTOR, '[class$="item-list"]')
+            titles = item_list.find_elements(By.CLASS_NAME, 'sds-comps-text-type-headline1')
+
+            for title in titles:
+                try:
+                    if compare_title(title.text, obj):
+                        rank = index + 1
+                        obj['rank'] = f'{rank}'
+                        obj['datetime'] = get_korean_datetime_string()
+                        return
+                except Exception as e:
+                    continue
 
         selectors = [
             Constant.NAVER_SMART_BLOCK_6_CSS_SELECTOR,
             Constant.NAVER_SMART_BLOCK_7_CSS_SELECTOR,
         ]
-        
-        rank, index = 0, 0
 
         for css_selector in selectors:
             try:
@@ -316,13 +343,14 @@ class NaverSpider:
                         title = urB_oR.find_element(By.CLASS_NAME, 'sds-comps-text-type-headline1').text
                         if compare_title(title, obj): 
                             rank = index + 1
-                            break
+                            obj['rank'] = f'{rank}'
+                            obj['datetime'] = get_korean_datetime_string()
+                            return
             except Exception as e:
                 continue
 
         obj['rank'] = '' if rank == 0 else (f'{rank}')
         obj['datetime'] = get_korean_datetime_string()
-
 
     def _check_smart_block(self, section, obj):
         titles = section.find_elements(By.CLASS_NAME,"sds-comps-text-type-headline1")
