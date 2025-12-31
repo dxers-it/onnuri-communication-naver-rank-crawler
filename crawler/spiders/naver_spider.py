@@ -320,6 +320,8 @@ class NaverSpider:
                         return
                 except Exception as e:
                     continue
+        else:
+            index = 0
 
         selectors = [
             Constant.NAVER_SMART_BLOCK_6_CSS_SELECTOR,
