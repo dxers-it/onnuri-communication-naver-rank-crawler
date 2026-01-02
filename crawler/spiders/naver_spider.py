@@ -318,6 +318,7 @@ class NaverSpider:
                         obj['rank'] = f'{rank}'
                         obj['datetime'] = get_korean_datetime_string()
                         return
+                    index += 1
                 except Exception as e:
                     continue
         else:
@@ -326,15 +327,23 @@ class NaverSpider:
         selectors = [
             Constant.NAVER_SMART_BLOCK_6_CSS_SELECTOR,
             Constant.NAVER_SMART_BLOCK_7_CSS_SELECTOR,
+            Constant.NAVER_SMART_BLOCK_8_CSS_SELECTOR,
+            Constant.NAVER_SMART_BLOCK_9_CSS_SELECTOR,
         ]
 
         for css_selector in selectors:
             try:
-                section = driver.find_element(By.CSS_SELECTOR, css_selector)
-                if css_selector in 'urB_boR':
-                    urB_oRs = section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_boR"]')
-                else:
-                    urB_oRs = section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_coR"]')
+                sections = driver.find_elements(By.CSS_SELECTOR, css_selector)
+                urB_oRs = []
+                for section in  sections:
+                    if css_selector in 'urB_boR':
+                        urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_boR"]'))
+                    elif css_selector in 'urB_coR':
+                        urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_coR"]'))
+                    elif css_selector in 'rrB_hdR':
+                        urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_hdR"]'))
+                    elif css_selector in 'rrB_bdR':
+                        urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_bdR"]'))
 
 
                 for urB_oR in urB_oRs:
