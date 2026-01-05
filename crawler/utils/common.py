@@ -15,10 +15,10 @@ def get_korean_datetime_string():
     return f"{dt.year}. {dt.month}. {dt.day} {am_pm} {hour}:{dt.minute:02d}:{dt.second:02d}"
 
 def compare_title(title, obj):
-    return title.replace(' ', '').replace('"', '').replace("'", '') == obj['title'].replace(' ', '').replace('\r', '').replace('\n', '').replace(' ', '').replace('"', '').replace("'", '')
+    return title.replace(' ', '').replace('"', '').replace("'", '') ==  normalize_text(obj['title']).replace(' ', '').replace('\r', '').replace('\n', '').replace(' ', '').replace('"', '').replace("'", '')
 
 def compare_subject(subject: str, keyword: str):
-    return subject.replace(' ', '').replace('"', '').replace("'", '') == keyword.replace(' ', '').replace('\r', '').replace('\n', '').replace(' ', '').replace('"', '').replace("'", '')
+    return subject.replace(' ', '').replace('"', '').replace("'", '') == normalize_text(keyword).replace(' ', '').replace('\r', '').replace('\n', '').replace(' ', '').replace('"', '').replace("'", '')
 
 def saveJsonFile(obj, name):
     os.path.join('data', f'{name}.json')
@@ -54,3 +54,32 @@ def conversion_list(adults, not_adults):
 
 def chunked(list):
     return [list[index: index + Constant.CHUNK_SIZE] for index in range(0, len(list), Constant.CHUNK_SIZE)]
+
+import re
+import unicodedata
+
+ZERO_WIDTH = dict.fromkeys(map(ord, [
+    "\u200b",  # zero width space
+    "\u200c",  # zero width non-joiner
+    "\u200d",  # zero width joiner
+    "\ufeff",  # BOM
+]), None)
+
+def normalize_text(s: str) -> str:
+    if s is None:
+        return ""
+    s = str(s)
+
+    # 1) 유니코드 정규화 (한글 조합 차이 제거)
+    s = unicodedata.normalize("NFC", s)
+
+    # 2) NBSP -> 일반 공백
+    s = s.replace("\u00a0", " ")
+
+    # 3) zero-width 제거
+    s = s.translate(ZERO_WIDTH)
+
+    # 4) 줄바꿈/탭 포함된 공백 정리
+    s = re.sub(r"\s+", " ", s).strip()
+
+    return s

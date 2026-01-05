@@ -1,4 +1,4 @@
-from ..utils.common import get_korean_datetime_string, compare_title, compare_subject, conversion_list, chunked, saveJsonFile
+from ..utils.common import normalize_text, get_korean_datetime_string, compare_title, compare_subject, conversion_list, chunked, saveJsonFile
 from ..utils.selenium_utils import set_chrome_driver, human_scroll, fake_paste_events
 from ..pipelines.google_sheets import GoogleSheet
 from ..settings import Constant, Env
@@ -35,7 +35,7 @@ class NaverSpider:
         login_chunks = chunked(self.logins)
         
         results = []
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=1) as executor:
             futures = []
            
             futures += [
@@ -84,10 +84,10 @@ class NaverSpider:
 
         human_scroll(driver)
 
-        if '인기글' == obj['popular_theme']: self._check_view(obj, driver)
-        elif '인기카페글' == obj['popular_theme']: self._check_cafe_view(obj, driver)
-        elif '인플루언서콘텐츠' in obj['popular_theme']: self._check_influencer_view(obj, driver)
-        elif '' == obj['popular_theme']: self._check_new_view(obj, driver)
+        if '인기글' == normalize_text(obj['popular_theme']): self._check_view(obj, driver)
+        elif '인기카페글' == normalize_text(obj['popular_theme']).replace(' ', ''): self._check_cafe_view(obj, driver)
+        elif '인플루언서콘텐츠' in  normalize_text(obj['popular_theme']).replace(' ', ''): self._check_influencer_view(obj, driver)
+        elif '' ==  normalize_text(obj['popular_theme']): self._check_new_view(obj, driver)
         else: self._check_smart_view(obj, driver)
 
 
@@ -330,21 +330,20 @@ class NaverSpider:
             Constant.NAVER_SMART_BLOCK_8_CSS_SELECTOR,
             Constant.NAVER_SMART_BLOCK_9_CSS_SELECTOR,
         ]
-
+        
         for css_selector in selectors:
             try:
                 sections = driver.find_elements(By.CSS_SELECTOR, css_selector)
                 urB_oRs = []
                 for section in  sections:
-                    if css_selector in 'urB_boR':
+                    if  'urB_boR' in css_selector:
                         urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_boR"]'))
-                    elif css_selector in 'urB_coR':
+                    elif 'urB_coR' in css_selector:
                         urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_coR"]'))
-                    elif css_selector in 'rrB_hdR':
+                    elif 'rrB_hdR' in css_selector:
                         urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_hdR"]'))
-                    elif css_selector in 'rrB_bdR':
+                    elif 'rrB_bdR' in css_selector:
                         urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_bdR"]'))
-
 
                 for urB_oR in urB_oRs:
                     href = urB_oR.find_element(By.TAG_NAME, 'a').get_attribute('href')

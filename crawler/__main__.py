@@ -7,7 +7,7 @@ def main():
 
     spiders = [
         NaverSpider(Env.INST_OBJ), 
-        # NaverSpider(Env.NEWTRI_OBJ)
+        NaverSpider(Env.NEWTRI_OBJ)
     ]
     for spider in spiders: spider.crawl()
 
