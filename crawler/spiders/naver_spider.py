@@ -35,7 +35,7 @@ class NaverSpider:
         login_chunks = chunked(self.logins)
         
         results = []
-        with ThreadPoolExecutor(max_workers=1) as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             futures = []
            
             futures += [
@@ -321,8 +321,8 @@ class NaverSpider:
                     index += 1
                 except Exception as e:
                     continue
-        else:
-            index = 0
+
+        index = 0
 
         selectors = [
             Constant.NAVER_SMART_BLOCK_6_CSS_SELECTOR,
@@ -337,25 +337,25 @@ class NaverSpider:
                 urB_oRs = []
                 for section in  sections:
                     if  'urB_boR' in css_selector:
-                        urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_boR"]'))
+                        urB_oRs += section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_boR"]')
                     elif 'urB_coR' in css_selector:
-                        urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_coR"]'))
+                        urB_oRs += section.find_elements(By.CSS_SELECTOR, '[data-meta-area="urB_coR"]')
                     elif 'rrB_hdR' in css_selector:
-                        urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_hdR"]'))
+                        urB_oRs += section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_hdR"]')
                     elif 'rrB_bdR' in css_selector:
-                        urB_oRs.append(section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_bdR"]'))
+                        urB_oRs += section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_bdR"]')
 
                 for urB_oR in urB_oRs:
                     href = urB_oR.find_element(By.TAG_NAME, 'a').get_attribute('href')
-                    if ('blog.naver' in href) or ('cafe.naver' in href) or ('kin.naver' in href):
-                        index += 1
-
+                    if 'naver.com' in href:
                         title = urB_oR.find_element(By.CLASS_NAME, 'sds-comps-text-type-headline1').text
                         if compare_title(title, obj): 
                             rank = index + 1
+                            print(rank)
                             obj['rank'] = f'{rank}'
                             obj['datetime'] = get_korean_datetime_string()
                             return
+                        index += 1
             except Exception as e:
                 continue
 
