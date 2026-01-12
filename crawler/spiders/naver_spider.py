@@ -346,12 +346,13 @@ class NaverSpider:
                         urB_oRs += section.find_elements(By.CSS_SELECTOR, '[data-meta-area="rrB_bdR"]')
 
                 for urB_oR in urB_oRs:
+                    if index == 7:
+                        break
                     href = urB_oR.find_element(By.TAG_NAME, 'a').get_attribute('href')
                     if 'naver.com' in href:
                         title = urB_oR.find_element(By.CLASS_NAME, 'sds-comps-text-type-headline1').text
                         if compare_title(title, obj): 
                             rank = index + 1
-                            print(rank)
                             obj['rank'] = f'{rank}'
                             obj['datetime'] = get_korean_datetime_string()
                             return
